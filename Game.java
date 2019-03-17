@@ -78,8 +78,8 @@ public class Game extends Application {
 	gc.setStroke(Color.WHITE);
 	gc.setLineWidth(2);
 	gc.setFont(Font.font("Stencil", FontWeight.BOLD, 48));
-	gc.fillText("Silicon", canvas.getWidth() / 2, canvas.getHeight() / 2);
-	gc.strokeText("Silicon", canvas.getWidth() / 2, canvas.getHeight() / 2);
+	gc.fillText("Silicon", canvas.getWidth() / 2, 0.0);
+	gc.strokeText("Silicon", canvas.getWidth() / 2, 0.0);
 
 	// Signal that we need to layout the BorderPane (ie. Nodes are done)
 	root.needsLayoutProperty();
@@ -89,7 +89,8 @@ public class Game extends Application {
 	stage.setTitle("Silicon");
 	// Create a Scene based on the BorderPane with no background fill
 	Scene scene = new Scene(root, null);
-//	scene.getStylesheets().add("file:src/button.css"); // Grr ... why won't it work?
+	// Load the Stylesheet for the Scene
+	scene.getStylesheets().add("file:src/Game.css");
 	// Add the Scene to the primary Stage and resize
 	stage.setScene(scene);
 	// Shift into FullScreen mode
@@ -99,17 +100,13 @@ public class Game extends Application {
 
 	    VBox vb = new VBox();
 	    vb.setAlignment(Pos.CENTER);
-	    vb.setStyle("-fx-padding: 10;" + "-fx-spacing: 8;");
 
-	    // "DB Code - it's kludgy, but it works ... most of the time."
-	    // Example 1: Can't make this effing CSS StyleSheet work!
-	    // Solution: set the Button's style in a method instead
-	    // - how many reasons can *you* think of, that make this a bad idea?
-	    Button btCreate = MyButton("Create Game");
-	    Button btLoad = MyButton("Load Game");
-	    Button btSave = MyButton("SaveGame");
-	    Button btSettings = MyButton("Settings");
-	    Button btExit = MyButton("Exit");
+	    // Create the Buttons for our main menu
+	    Button btCreate = new Button("Create Game");
+	    Button btLoad = new Button("Load Game");
+	    Button btSave = new Button("SaveGame");
+	    Button btSettings = new Button("Settings");
+	    Button btExit = new Button("Exit");
 	    vb.getChildren().addAll(btCreate, btLoad, btSave, btSettings, btExit);
 	    // Parental secrets: Nobody will ever tell you your child is ugly.  These Buttons are beautiful!
 	    root.setCenter(vb);
@@ -140,21 +137,11 @@ public class Game extends Application {
     }
     
     /*
-     * All this is doing, is what the effing CSS style sheet would do, if it worked as advertised
-     * But I am mortally ashamed of how inelegant this is
-     * ... and I apologise (in advance) to the other programmers on the team for making them look at such garbage code!
+     * Methods to enter and leave FullScreen mode
+     * - save and restore the screen hint
+     * - save and restore the key combination (usually ESC)
+     * - disable use of the ESC key to leave
      */
-    private Button MyButton(String str) {
-	Button rButton = new Button(str);
-	rButton.setStyle("-fx-background-color:#ecebe9,rgba(0,0,0,0.05),linear-gradient(#dcca8a, #c7a740),"
-		+ "linear-gradient(#f9f2d6 0%, #f4e5bc 20%, #e6c75d 80%, #e2c045 100%),"
-		+ "linear-gradient(#f6ebbe, #e6c34d);" + "-fx-background-insets: 0,9 9 8 9,9,10,11;"
-		+ "-fx-background-radius: 50;" + "-fx-padding: 15 30 15 30;" + "-fx-font-family: 'Helvetica';"
-		+ "-fx-font-size: 18px;" + "-fx-text-fill: #311c09;"
-		+ "-fx-effect: innershadow( three-pass-box , rgba(0,0,0,0.1) , 2, 0.0 , 0 , 1);");
-	return rButton;
-    }
-
     private boolean enterFullScreen(Stage stage) {
 	oldHint = stage.getFullScreenExitHint();
 	stage.setFullScreenExitHint("Press \"ESC\" key for main menu");
