@@ -9,7 +9,6 @@ import java.io.IOException;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
-import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -23,10 +22,7 @@ import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.TextAlignment;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
@@ -35,7 +31,9 @@ import javafx.stage.StageStyle;
  */
 
 public class Game extends Application {
+    Stage stage;
     GraphicsContext gc; // Graphics Context for drawing on primary Stage
+    BorderPane root;
     String oldHint; // Storage: former "press ESC key" message
     KeyCombination oldKey; // Storage: former exit-from-FullScreen key(s)
 
@@ -52,6 +50,7 @@ public class Game extends Application {
      */
     @Override
     public void start(Stage stage) throws IOException {
+	this.stage = stage;
 	// Create an Image from our file
 	Image image = new Image("file:src/iconic-photographs-1940-first-computer.jpg");
 	// Create a Canvas to draw the GameBoard on
@@ -59,99 +58,101 @@ public class Game extends Application {
 	// Get the graphics context of the Canvas (used for drawing)
 	gc = canvas.getGraphicsContext2D();
 	// Create a BorderPane with the Canvas in the Center region
-	BorderPane root = new BorderPane(canvas);
-	// Use JavaFX CSS to set the style properties of the BorderPane
-	root.setStyle("-fx-padding: 10;" + "-fx-border-style: solid inside;" + "-fx-border-width: 2;"
-		+ "-fx-border-insets: 5;" + "-fx-border-radius: 5;" + "-fx-border-color: blue;");
+	root = new BorderPane(canvas);
+	// Load the JavaFX CSS and set the style properties of the BorderPane
+	root.getStylesheets().add("file:src/Game.css");
+	root.getStyleClass().add("my-border-pane");
 	// Set our first "decade/era" photo as the BorderPane background
 	root.setBackground(
 		new Background(new BackgroundImage(image, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
 			BackgroundPosition.CENTER, new BackgroundSize(0.0d, 0.0d, false, false, false, true))));
-	/*
-	 * Draw some WordArt-style text in the Center region (traditional method).
-	 * Alternatively, we could use setStyle() and JavaFX CSS to set the style
-	 * properties of the Canvas.
-	 */
-	gc.setTextAlign(TextAlignment.CENTER);
-	gc.setTextBaseline(VPos.CENTER);
-	gc.setFill(Color.GREEN);
-	gc.setStroke(Color.WHITE);
-	gc.setLineWidth(2);
-	gc.setFont(Font.font("Stencil", FontWeight.BOLD, 48));
-	gc.fillText("Silicon", canvas.getWidth() / 2, 0.0);
-	gc.strokeText("Silicon", canvas.getWidth() / 2, 0.0);
-
-	// Signal that we need to layout the BorderPane (ie. Nodes are done)
-	root.needsLayoutProperty();
 	// Set the Style for the primary Stage
 	stage.initStyle(StageStyle.TRANSPARENT);
 	// Set the title of the primary Stage
 	stage.setTitle("Silicon");
 	// Create a Scene based on the BorderPane with no background fill
 	Scene scene = new Scene(root, null);
-	// Load the Stylesheet for the Scene
-	scene.getStylesheets().add("file:src/Game.css");
 	// Add the Scene to the primary Stage and resize
 	stage.setScene(scene);
-	// Shift into FullScreen mode
-	if (enterFullScreen(stage)) {
-	    // Show the primary Stage
+	// Can we enter FullScreen mode?
+	if (enterFullScreen()) {
+	    // Y: Show the Game Board and Main Menu
+	    drawLogo();
+	    mainMenu();
+	    // Signal that we need to layout the BorderPane (ie. Nodes are done)
+	    root.needsLayoutProperty();
 	    stage.show();
-
-	    VBox vb = new VBox();
-	    vb.setAlignment(Pos.CENTER);
-
-	    // Create the Buttons for our main menu
-	    Button btCreate = new Button("Create Game");
-	    Button btLoad = new Button("Load Game");
-	    Button btSave = new Button("SaveGame");
-	    Button btSettings = new Button("Settings");
-	    Button btExit = new Button("Exit");
-	    vb.getChildren().addAll(btCreate, btLoad, btSave, btSettings, btExit);
-	    // Parental secrets: Nobody will ever tell you your child is ugly.  These Buttons are beautiful!
-	    root.setCenter(vb);
-
-	    // Create and register the handlers
-	    btCreate.setOnAction((ActionEvent ae) -> {
-		System.out.println("Process Create");
-	    });
-
-	    btLoad.setOnAction(ae -> {
-		System.out.println("Process Load");
-	    });
-
-	    btSave.setOnAction(ae -> {
-		System.out.println("Process Save");
-	    });
-
-	    btSettings.setOnAction(ae -> {
-		System.out.println("Process Settings");
-	    });
-
-	    btExit.setOnAction(ae -> {
-		System.out.println("Process Exit");
-		leaveFullScreen(stage);
-	    });
 	}
-	root.requestFocus();
     }
-    
+
     /*
-     * Methods to enter and leave FullScreen mode
-     * - save and restore the screen hint
-     * - save and restore the key combination (usually ESC)
-     * - disable use of the ESC key to leave
+     * drawLogo() method - draws logo Text formatting is defined in the Game.css
+     * file as ".logo-text"
      */
-    private boolean enterFullScreen(Stage stage) {
+    private boolean drawLogo() {
+	Text wrap = new Text();
+	wrap.getStyleClass().add("logo-text");
+	wrap.setText("Silicon");
+	root.setTop(wrap);
+	return true;
+    }
+
+    /*
+     * mainMenu() method - draws main menu buttons, includes event handlers
+     */
+    private boolean mainMenu() {
+	// Create a VBox to hold our main menu
+	VBox vb = new VBox(5.0d);
+	vb.setAlignment(Pos.CENTER);
+
+	// Create the Buttons for our main menu (styles are in Game.css)
+	Button btCreate = new Button("Create Game");
+	Button btLoad = new Button("Load Game");
+	Button btSave = new Button("Save Game");
+	Button btSettings = new Button("Settings");
+	Button btExit = new Button("Exit");
+	vb.getChildren().addAll(btCreate, btLoad, btSave, btSettings, btExit);
+	root.setCenter(vb);
+
+	// Create and register the event-handlers
+	btCreate.setOnAction((ActionEvent ae) -> {
+	    System.out.println("Process Create");
+	});
+
+	btLoad.setOnAction(ae -> {
+	    System.out.println("Process Load");
+	});
+
+	btSave.setOnAction(ae -> {
+	    System.out.println("Process Save");
+	});
+
+	btSettings.setOnAction(ae -> {
+	    System.out.println("Process Settings");
+	});
+
+	btExit.setOnAction(ae -> {
+	    System.out.println("Process Exit");
+	    leaveFullScreen();
+	});
+	return true;
+    }
+
+    /*
+     * Methods to enter and leave FullScreen mode - save and restore the on-screen
+     * hint - save and restore the key combination (usually ESC) - disable use of
+     * the ESC key to leave
+     */
+    private boolean enterFullScreen() {
 	oldHint = stage.getFullScreenExitHint();
-	stage.setFullScreenExitHint("Press \"ESC\" key for main menu");
+	stage.setFullScreenExitHint("");
 	oldKey = stage.getFullScreenExitKeyCombination();
 	stage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
 	stage.setFullScreen(true);
 	return true;
     }
 
-    private boolean leaveFullScreen(Stage stage) {
+    private boolean leaveFullScreen() {
 	stage.setFullScreenExitHint(oldHint);
 	stage.setFullScreenExitKeyCombination(oldKey);
 	stage.setFullScreen(false);

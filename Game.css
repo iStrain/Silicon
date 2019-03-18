@@ -1,4 +1,13 @@
+.my-border-pane {
+	-fx-padding: 10;
+	-fx-border-style: solid inside;
+	-fx-border-width: 2;
+	-fx-border-insets: 5;
+	-fx-border-radius: 5;
+	-fx-border-color: #311c09;
+}
 .button {
+	-fx-min-width:200;
     -fx-background-color: 
         #ecebe9,
         rgba(0,0,0,0.05),
@@ -27,4 +36,15 @@
 }
 .button Text {
     -fx-effect: dropshadow( one-pass-box , rgba(255,255,255,0.5) , 0, 0.0 , 0 , 1);
+}
+.logo-text {
+	-fx-font-family: 'Neogrey';
+	-fx-font-size: 96px;
+	-fx-font-style: normal;
+	-fx-font-weight: bold;
+	-fx-text-alignment: center;
+	-fx-text-origin: bottom;
+	-fx-text-fill: #311c09;
+    -fx-stroke-width: 3;
+	-fx-stroke: #f6ebbe;
 }
