@@ -8,13 +8,16 @@ import java.io.IOException;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
@@ -22,7 +25,6 @@ import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
@@ -90,10 +92,13 @@ public class Game extends Application {
      * formatting is defined in the Game.css file as ".logo-text"
      */
     private boolean drawLogo() {
-	Text text = new Text("silicon");
-	text.getStyleClass().add("logo-text");
-	root.setTop(text);
-	BorderPane.setAlignment(text, Pos.CENTER);
+	/*
+	 * Text text = new Text("silicon"); text.getStyleClass().add("logo-text");
+	 * root.setTop(text); BorderPane.setAlignment(text, Pos.CENTER);
+	 */
+	ImageView iv = new ImageView("file:bin/images/Silicon-logo.png");
+	root.setTop(iv);
+	BorderPane.setAlignment(iv, Pos.CENTER);
 	return true;
     }
 
@@ -104,6 +109,8 @@ public class Game extends Application {
 	// Create a VBox to hold our main menu
 	VBox vb = new VBox(5.0d);
 	vb.setAlignment(Pos.CENTER);
+	root.setCenter(vb);
+	BorderPane.setAlignment(vb, Pos.TOP_CENTER);
 
 	// Create the Buttons for our main menu (styles are in Game.css)
 	Button btCreate = new Button("Create Game");
@@ -112,41 +119,58 @@ public class Game extends Application {
 	Button btSettings = new Button("Settings");
 	Button btExit = new Button("Exit");
 	vb.getChildren().addAll(btCreate, btLoad, btSave, btSettings, btExit);
-	root.setCenter(vb);
-	BorderPane.setAlignment(vb, Pos.CENTER);
 
 	// Create and register the event-handlers
 	btCreate.setOnAction((ActionEvent ae) -> {
-	    /*
-	     * Use our sound generator to play "middle C" for 1/10 of a second. Of course,
-	     * here we hit a tiny problem: our Button ActionEvent fires on mouse button
-	     * lift-off, but we want to play the sound on mouse button down. Playing the
-	     * sound on lift-off just makes our game seem like it has a latency problem. Do
-	     * I have volunteers to write some mouse event-handlers?
-	     */
-	    Sound.tone(262, 100);
 	    System.out.println("Process Create");
 	});
 
+	btCreate.setOnMousePressed(new EventHandler<MouseEvent>() {
+	    public void handle(MouseEvent event) {
+		// Use our sound generator to play "middle C" for 1/10 of a second.
+		new Thread(new Tone(262, 100)).start();
+	    }
+	});
+
 	btLoad.setOnAction(ae -> {
-	    Sound.tone(262, 100);
 	    System.out.println("Process Load");
 	});
 
+	btLoad.setOnMousePressed(new EventHandler<MouseEvent>() {
+	    public void handle(MouseEvent event) {
+		new Thread(new Tone(262, 100)).start();
+	    }
+	});
+
 	btSave.setOnAction(ae -> {
-	    Sound.tone(262, 100);
 	    System.out.println("Process Save");
 	});
 
+	btSave.setOnMousePressed(new EventHandler<MouseEvent>() {
+	    public void handle(MouseEvent event) {
+		new Thread(new Tone(262, 100)).start();
+	    }
+	});
+
 	btSettings.setOnAction(ae -> {
-	    Sound.tone(262, 100);
 	    System.out.println("Process Settings");
 	});
 
+	btSettings.setOnMousePressed(new EventHandler<MouseEvent>() {
+	    public void handle(MouseEvent event) {
+		new Thread(new Tone(262, 100)).start();
+	    }
+	});
+
 	btExit.setOnAction(ae -> {
-	    Sound.tone(262, 100);
 	    System.out.println("Process Exit");
 	    leaveFullScreen();
+	});
+
+	btExit.setOnMousePressed(new EventHandler<MouseEvent>() {
+	    public void handle(MouseEvent event) {
+		new Thread(new Tone(262, 100)).start();
+	    }
 	});
 	return true;
     }

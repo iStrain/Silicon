@@ -38,7 +38,7 @@
     -fx-effect: dropshadow( one-pass-box , rgba(255,255,255,0.5) , 0, 0.0 , 0 , 1);
 }
 .logo-text {
-	-fx-font-family: 'Marske';
+	-fx-font-family: 'neogrey';
 	-fx-font-size: 96px;
 	-fx-font-style: normal;
 	-fx-font-weight: bold;
