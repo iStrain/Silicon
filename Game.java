@@ -40,7 +40,7 @@ public class Game extends Application {
     /*
      * JavaFX Application thread automatically calls start() method. The parameter
      * Stage stage is our top-level window, then Scene scene, BorderPane root, and
-     * finally other Nodes (eg. Canvas canvas, Canvas art, Text wrap).
+     * finally other Nodes. This is quite short: it just creates the GUI.
      * 
      * start() may throw an IOException when trying to load the Image from the file.
      * There's no point in continuing if we can't load the Image, so the exception
@@ -52,7 +52,7 @@ public class Game extends Application {
     public void start(Stage stage) throws IOException {
 	this.stage = stage;
 	// Create an Image from our file
-	Image image = new Image("file:src/iconic-photographs-1940-first-computer.jpg");
+	Image image = new Image("file:bin/images/iconic-photographs-1940-first-computer.jpg");
 	// Create a Canvas to draw the GameBoard on
 	Canvas canvas = new Canvas(image.getWidth(), image.getHeight());
 	// Get the graphics context of the Canvas (used for drawing)
@@ -86,14 +86,14 @@ public class Game extends Application {
     }
 
     /*
-     * drawLogo() method - draws logo Text formatting is defined in the Game.css
-     * file as ".logo-text"
+     * drawLogo() method - draws the Silicon logo on the Game Board. The text
+     * formatting is defined in the Game.css file as ".logo-text"
      */
     private boolean drawLogo() {
-	Text wrap = new Text();
-	wrap.getStyleClass().add("logo-text");
-	wrap.setText("Silicon");
-	root.setTop(wrap);
+	Text text = new Text("silicon");
+	text.getStyleClass().add("logo-text");
+	root.setTop(text);
+	BorderPane.setAlignment(text, Pos.CENTER);
 	return true;
     }
 
@@ -113,25 +113,38 @@ public class Game extends Application {
 	Button btExit = new Button("Exit");
 	vb.getChildren().addAll(btCreate, btLoad, btSave, btSettings, btExit);
 	root.setCenter(vb);
+	BorderPane.setAlignment(vb, Pos.CENTER);
 
 	// Create and register the event-handlers
 	btCreate.setOnAction((ActionEvent ae) -> {
+	    /*
+	     * Use our sound generator to play "middle C" for 1/10 of a second. Of course,
+	     * here we hit a tiny problem: our Button ActionEvent fires on mouse button
+	     * lift-off, but we want to play the sound on mouse button down. Playing the
+	     * sound on lift-off just makes our game seem like it has a latency problem. Do
+	     * I have volunteers to write some mouse event-handlers?
+	     */
+	    Sound.tone(262, 100);
 	    System.out.println("Process Create");
 	});
 
 	btLoad.setOnAction(ae -> {
+	    Sound.tone(262, 100);
 	    System.out.println("Process Load");
 	});
 
 	btSave.setOnAction(ae -> {
+	    Sound.tone(262, 100);
 	    System.out.println("Process Save");
 	});
 
 	btSettings.setOnAction(ae -> {
+	    Sound.tone(262, 100);
 	    System.out.println("Process Settings");
 	});
 
 	btExit.setOnAction(ae -> {
+	    Sound.tone(262, 100);
 	    System.out.println("Process Exit");
 	    leaveFullScreen();
 	});
@@ -139,9 +152,9 @@ public class Game extends Application {
     }
 
     /*
-     * Methods to enter and leave FullScreen mode - save and restore the on-screen
-     * hint - save and restore the key combination (usually ESC) - disable use of
-     * the ESC key to leave
+     * Methods to enter and leave FullScreen mode. - save and restore the on-screen
+     * hint; - save and restore the key combination (usually ESC); - disable use of
+     * the ESC key to leave.
      */
     private boolean enterFullScreen() {
 	oldHint = stage.getFullScreenExitHint();
@@ -160,8 +173,8 @@ public class Game extends Application {
     }
 
     /*
-     * The usual "main" method - code is only executed on platforms that lack full
-     * JavaFX support.
+     * The usual "main" method - this code is only executed on platforms that lack
+     * full JavaFX support.
      */
     public static void main(String[] args) {
 	Application.launch(args);
