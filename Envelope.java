@@ -15,7 +15,7 @@
  * Constructors are provided for 4 Twains or 4 duration/level pairs.
  * The caller can also specify ADSHR (attack.duration, decay.duration, sustain.level, 
  * sustain.duration (Hold) and release.duration.
- * Durations are denominated in milliseconds, level in normalised volume (0.0d ... 1.0d)
+ * Durations are denominated in milliseconds, levels in normalised volume (0.0d ... 1.0d)
  * There is also an accessor method to get the total duration of a Tone
  */
 
@@ -73,10 +73,10 @@ public class Envelope {
     }
 
     /*
-     * createEnvArray(): Creates an array of ADSR modulation factors (0.0 ... 1.0),
-     * one for each sample. The constructors call this method. However, as the array
-     * of factors is public, its contents may be accessed directly as
-     * Envelope.envArray[index].
+     * createEnvArray(): Creates an array of ADSR modulators (0.0 ... 1.0), one for
+     * each sample quanta. The constructors call this method. However, as the array
+     * of modulators is public, its contents can be accessed directly as (e.g.)
+     * env.envArray[index]. This should be more efficient for the calling method.
      */
     private void createEnvArray() {
 	int multiplier = Tone.getMultiplier();

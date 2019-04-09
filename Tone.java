@@ -34,19 +34,19 @@
  * the envelope for a tone lasting one-tenth of a second will require the calculation of 2,200 individual levels
  * (actually done within the constructor for the Envelope object).
  * 
- * So, the preferred way to use Envelopes is:
+ * So, the preferred way to use Envelope is:
  * 
- * 	Envelope env = new Envelope(10, 5, 0.75d, 60, 25);  <-- Do this somewhere in setup (make a bunch of them!)
+ * 	Envelope env = new Envelope(10, 5, 0.75d, 60, 25);  <-- Do this somewhere in setup
  *	Tone.setEnvelope(env.envArray);  <-- static function, accessible outside Tone and without a Tone object
- *	new Thread(new Tone(262, 100, 0.75d)).start();  <-- Play fundamental note (with ADSR)
- *	new Thread(new Tone(786, 100, 0.25d)).start();	<-- Play 3rd harmonic (with ADSR) 
+ *	new Thread(new Tone(262, 100, 0.75d)).start();  <-- Play fundamental note (with Envelope)
+ *	new Thread(new Tone(786, 100, 0.25d)).start();	<-- Play 3rd harmonic (with Envelope) 
  *
- * This example will set an envelope with 10ms attack, 5ms decay, sustain at 75% volume for 60ms, then 25ms release.
+ * This example will set an envelope with 10ms attack, 5ms decay, sustain at 75% volume for 60ms, and 25ms release.
  * It will then play a fundamental note at middle C, with its 3rd harmonic, both modulated with the envelope.
  * 
  * Note: This is "kind-of" backwards-compatible with earlier versions of Tone: if your app does not set an Envelope,
- * the default will apply and you will get the raw tone.  That is probably more listenable than the base-grade ADSR 
- * I had in there before.
+ * the default will apply (null) and you will get the raw tone.  That is probably more listenable than the base-grade  
+ * ADSR I had in there before.
  */
 
 import javax.sound.sampled.AudioFormat;
@@ -62,7 +62,7 @@ public class Tone implements Runnable {
     private int hz; // Frequency of sound to play
     private int msecs; // Milliseconds to play the sound
     private double vol; // Volume (0.0 ... 1.0) for the sound
-    static private double[] envArray = null;
+    static private double[] envArray = null; // ADSR Envelope to use to modulate the sound (null = none)
 
     /*
      * This is the constructor for code that just wants to specify frequency and
@@ -87,8 +87,8 @@ public class Tone implements Runnable {
     }
 
     /*
-     * Accessor method for value of MULTIPLIER Other classes can use it to convert
-     * from milliseconds to sampling 'ticks
+     * Accessor method for value of MULTIPLIER. Other classes can use it to convert
+     * from milliseconds to sampling 'ticks.
      */
     static public int getMultiplier() {
 	return MULTIPLIER;
@@ -107,8 +107,8 @@ public class Tone implements Runnable {
 
     /*
      * This is the code for a new thread that plays a tone. Multiple tones,
-     * including for harmonics, or fade-in/fade-out effects, require multiple
-     * threads
+     * including for harmonics, tunes or fade-in/fade-out effects, require multiple
+     * threads.
      * 
      * @see java.lang.Runnable#run()
      */
@@ -119,7 +119,7 @@ public class Tone implements Runnable {
 	/*
 	 * Sound output lines can be a bit scarce at times, especially when you start
 	 * using them in multiples (e.g. to play harmonics) - well worth a try/catch
-	 * block
+	 * block.
 	 */
 	SourceDataLine sdl;
 	try {
@@ -145,25 +145,27 @@ public class Tone implements Runnable {
 	 * We generate sampled quanta for a sine wave at the requested frequency and
 	 * scale them to -127.0 ... +127.0 (adjusted by volume if required). We store
 	 * the result in our buffer. To minimise latency, our buffer is somewhat smaller
-	 * than the data line's internal buffer. The variable "written" keeps track of
-	 * how many samples we have written to the data line, and also ensures
-	 * continuity between the last quanta in one block, and the first quanta in the
-	 * next block (otherwise the phase change between blocks, from (angle =
-	 * BLOCK_SIZE - 1) to (angle = 0) can cause a perceptible "warbling" in the
-	 * tone). There are two versions, depending on whether we need an ADSR envelope
-	 * (no envelope is signified by a "null" in envArray[]).
+	 * than the data line's internal buffer.
+	 * 
+	 * The variable "written" keeps track of how many samples we have written to the
+	 * data line, and we also use it to maintain continuity between the last quanta
+	 * in one block, and the first quanta in the next block (otherwise the phase
+	 * change between blocks, from (angle = BLOCK_SIZE - 1) to (angle = 0) can cause
+	 * a perceptible "warbling" in the tone).
+	 * 
+	 * There are two versions, depending on whether we need an ADSR envelope (no
+	 * envelope is signified by a "null" in envArray[]).
 	 */
 	double scalar = hz * SCALE;
 	int sample = msecs * MULTIPLIER;
 	int written = 0;
 	byte[] buf = new byte[BLOCK_SIZE];
+	int block = BLOCK_SIZE;
 	sdl.start();
-	int block;
 	if (envArray != null) {
 	    while (written < sample) {
-		block = BLOCK_SIZE;
-		if (block > sample) {
-		    block = sample;
+		if ((written + block) > sample) {
+		    block = sample - written;
 		}
 		for (int i = 0; i < block; i++) {
 		    double angle = (written + i) * scalar;
@@ -174,9 +176,8 @@ public class Tone implements Runnable {
 	    }
 	} else {
 	    while (written < sample) {
-		block = BLOCK_SIZE;
-		if (block > sample) {
-		    block = sample;
+		if ((written + block) > sample) {
+		    block = sample - written;
 		}
 		for (int i = 0; i < block; i++) {
 		    double angle = (written + i) * scalar;
