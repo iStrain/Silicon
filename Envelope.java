@@ -51,6 +51,20 @@ public class Envelope {
 	createEnvArray();
     }
 
+    // Alternative constructor for Envelope Class - requires 2 arrays of 5 elements each:
+    // array[0] is ignored, then Attack[1], Decay[2], Sustain[3] and Release[4]
+    public Envelope(int[] durations, double[] levels) {
+	attack.duration = durations[1];
+	attack.level = levels[1];
+	decay.duration = durations[2];
+	decay.level = levels[2];
+	sustain.duration = durations[3];
+	sustain.level = levels[3];
+	release.duration = durations[4];
+	release.level = levels[4];
+	createEnvArray();
+    }
+
     // Alternative constructor for Envelope Class - requires Attack, Decay, Sustain,
     // Hold and Release. Attack, Decay, Hold and Release are all durations
     // (in milliseconds). Sustain is a level (0.0d ... 1.0d).
@@ -100,14 +114,14 @@ public class Envelope {
 
 	// Sustain phase
 	step = (this.sustain.level - this.decay.level) / (this.sustain.duration * multiplier);
-	for (i = sample; i < this.sustain.duration * multiplier; i++) {
+	for (i = sample; i < sample + this.sustain.duration * multiplier; i++) {
 	    this.envArray[i] = this.envArray[i - 1] + step;
 	}
 	sample = i;
 
 	// Release phase
 	step = (this.release.level - this.sustain.level) / (this.release.duration * multiplier);
-	for (i = sample; i < this.release.duration * multiplier; i++) {
+	for (i = sample; i < sample + this.release.duration * multiplier; i++) {
 	    this.envArray[i] = this.envArray[i - 1] + step;
 	}
     }
